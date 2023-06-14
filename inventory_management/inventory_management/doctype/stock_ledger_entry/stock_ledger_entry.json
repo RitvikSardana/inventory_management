@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "autoname": "format:SLE-{YYYY}-{#####}",
+ "creation": "2023-06-12 18:22:51.620733",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "warehouse",
+  "column_break_ijkz",
+  "date",
+  "posting_time",
+  "section_break_nxzg",
+  "qty_change",
+  "qty_after_transaction",
+  "column_break_3oqe",
+  "price",
+  "balance_stock_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_ijkz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Now",
+   "fieldname": "section_break_nxzg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "qty_change",
+   "fieldtype": "Int",
+   "label": "Qty Change",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "qty_after_transaction",
+   "fieldtype": "Int",
+   "label": "Qty After Transaction",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Float",
+   "label": "Price",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "balance_stock_value",
+   "fieldtype": "Float",
+   "label": "Balance Stock Value",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_3oqe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "set_only_once": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-06-14 15:03:21.218900",
+ "modified_by": "Administrator",
+ "module": "Inventory Management",
+ "name": "Stock Ledger Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
