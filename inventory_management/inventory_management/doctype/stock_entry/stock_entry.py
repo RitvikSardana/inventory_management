@@ -22,15 +22,6 @@ class StockEntry(Document):
             if stock_entry_type != 'Material Receipt' and int(item['qty']) > qty:
                 frappe.throw(f"Stock Unavailable in Row {index+1}")
 
-            if stock_entry_type == 'Material Receipt':
-                self.material_receipt_stock_ledger_entry()
-
-            elif stock_entry_type == 'Material Consume':
-                self.material_consume_stock_ledger_entry()
-
-            elif stock_entry_type == 'Material Transfer':
-                self.material_transfer_stock_ledger_entry()
-
     def formatted_child_table(self):
         items_list = []
         for row in self.items:
@@ -61,8 +52,8 @@ class StockEntry(Document):
                     "Both Target Warehouse and Source Warehouse are Required")
 
         # query to get the item's opening stock
-        item_qty = frappe.qb.from_(item_doc).select(
-            "qty").where(item_doc.item_name == item['item']).run()
+        item_qty = frappe.qb.from_(item_doc).select("qty").where(
+            item_doc.item_name == item['item']).run()
 
         # Above query returns a tuple so unpack it
         if len(item_qty) > 0:
@@ -73,7 +64,14 @@ class StockEntry(Document):
         return item_qty
 
     def on_submit(self):
-        pass
+        if self.stock_entry_type == 'Material Receipt':
+            self.material_receipt_stock_ledger_entry()
+
+        elif self.stock_entry_type == 'Material Consume':
+            self.material_consume_stock_ledger_entry()
+
+        elif self.stock_entry_type == 'Material Transfer':
+            self.material_transfer_stock_ledger_entry()
 
     def material_receipt_stock_ledger_entry(self):
         pass
