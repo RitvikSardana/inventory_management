@@ -10,6 +10,7 @@ class StockEntry(Document):
     def validate(self):
         children_items_list = self.formatted_child_table()
 
+        # enumerate used to get index of the child,and increment it by 1 to get the row value for better UX
         for index, item in enumerate(children_items_list):
 
             stock_entry_type = self.stock_entry_type
@@ -59,10 +60,11 @@ class StockEntry(Document):
                 frappe.throw(
                     "Both Target Warehouse and Source Warehouse are Required")
 
-        # Only Once we have to query
+        # query to get the item's opening stock
         item_qty = frappe.qb.from_(item_doc).select(
             "qty").where(item_doc.item_name == item['item']).run()
 
+        # Above query returns a tuple so unpack it
         if len(item_qty) > 0:
             item_qty = item_qty[0][0]
         else:
