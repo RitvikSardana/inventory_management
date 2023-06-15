@@ -3,24 +3,26 @@
 
 import frappe
 from frappe.model.document import Document
+from inventory_management.inventory_management.sle_utils import create_sle_entry
 
 
 class StockEntry(Document):
 
     def validate(self):
         children_items_list = self.formatted_child_table()
-
         # enumerate used to get index of the child,and increment it by 1 to get the row value for better UX
         for index, item in enumerate(children_items_list):
 
             stock_entry_type = self.stock_entry_type
-            # Validate the stock entry type and return qty
-            qty = self.stock_entry_method_validate_return_quantity(
-                stock_entry_type, item)
 
+            # Validate the stock entry type and return opening stock
+            opening_stock = self.stock_entry_method_validate_return_quantity(
+                stock_entry_type, item)
             # For Receipt We should not check if stock is available or not
-            if stock_entry_type != 'Material Receipt' and int(item['qty']) > qty:
+            if stock_entry_type != 'Material Receipt' and item['qty'] > opening_stock:
                 frappe.throw(f"Stock Unavailable in Row {index+1}")
+
+        # Make a list of warehouse and items and query once
 
     def formatted_child_table(self):
         items_list = []
@@ -52,18 +54,19 @@ class StockEntry(Document):
                     "Both Target Warehouse and Source Warehouse are Required")
 
         # query to get the item's opening stock
-        item_qty = frappe.qb.from_(item_doc).select("qty").where(
+        item_opening_stock = frappe.qb.from_(item_doc).select("opening_stock").where(
             item_doc.item_name == item['item']).run()
 
         # Above query returns a tuple so unpack it
-        if len(item_qty) > 0:
-            item_qty = item_qty[0][0]
+        if len(item_opening_stock) > 0:
+            item_opening_stock = item_opening_stock[0][0]
         else:
-            item_qty = 0
+            item_opening_stock = 0
 
-        return item_qty
+        return item_opening_stock
 
     def on_submit(self):
+        # For each item create SLE
         if self.stock_entry_type == 'Material Receipt':
             self.material_receipt_stock_ledger_entry()
 
@@ -74,10 +77,41 @@ class StockEntry(Document):
             self.material_transfer_stock_ledger_entry()
 
     def material_receipt_stock_ledger_entry(self):
-        pass
+        children_items_list = self.formatted_child_table()
+        for item in children_items_list:
+            create_sle_entry(
+                item=item['item'],
+                warehouse=item['target_warehouse'],
+                qty_change=item['qty'],
+                price=item['price'],
+                balance_stock_value=item['qty'] * item['price']
+            )
 
     def material_consume_stock_ledger_entry(self):
-        pass
+        children_items_list = self.formatted_child_table()
+        for item in children_items_list:
+            create_sle_entry(
+                item=item['item'],
+                warehouse=item['source_warehouse'],
+                qty_change=-1 * item['qty'],
+                price=item['price'],
+                stock_value_change=-1 * item['qty'] * item['price']
+            )
 
     def material_transfer_stock_ledger_entry(self):
-        pass
+        children_items_list = self.formatted_child_table()
+        for item in children_items_list:
+            create_sle_entry(
+                item=item['item'],
+                warehouse=item['target_warehouse'],
+                qty_change=item['qty'],
+                price=item['price'],
+                stock_value_change=item['qty'] * item['price']
+            )
+            create_sle_entry(
+                item=item['item'],
+                warehouse=item['source_warehouse'],
+                qty_change=-1 * item['qty'],
+                price=item['price'],
+                stock_value_change=-1 * item['qty'] * item['price']
+            )

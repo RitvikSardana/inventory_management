@@ -9,7 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_name",
-  "qty",
+  "opening_stock",
   "price",
   "warehouse"
  ],
@@ -39,16 +39,16 @@
    "set_only_once": 1
   },
   {
-   "fieldname": "qty",
+   "fieldname": "opening_stock",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Qty",
+   "label": "Opening stock",
    "set_only_once": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-14 16:45:05.169599",
+ "modified": "2023-06-15 11:32:42.148170",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Item",

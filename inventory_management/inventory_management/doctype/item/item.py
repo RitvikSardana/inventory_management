@@ -12,18 +12,3 @@ class Item(Document):
             default_warehouse = frappe.db.get_single_value(
                 "Stock Settings", "default_warehouse")
             self.warehouse = default_warehouse
-
-    def after_insert(self):
-
-        sle_doc = frappe.qb.DocType("Stock Ledger Entry")
-        # frappe.qb.from_(sle_doc).sum.select(sle_doc['qty_after_transaction'])
-
-        if self.qty:
-            create_sle_entry(
-                item=self.item_name,
-                warehouse=self.warehouse,
-                qty_change=self.qty,
-                qty_after_transaction=self.qty,
-                price=self.price,
-                balance_stock_value=self.qty * self.price
-            )

@@ -20,6 +20,8 @@
   {
    "fieldname": "stock_entry_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Stock Entry Type",
    "options": "Material Receipt\nMaterial Consume\nMaterial Transfer"
   },
@@ -64,7 +66,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-13 11:34:12.665350",
+ "modified": "2023-06-15 12:10:49.868511",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Stock Entry",

@@ -14,10 +14,9 @@
   "posting_time",
   "section_break_nxzg",
   "qty_change",
-  "qty_after_transaction",
-  "column_break_3oqe",
   "price",
-  "balance_stock_value"
+  "column_break_3oqe",
+  "stock_value_change"
  ],
  "fields": [
   {
@@ -56,21 +55,9 @@
    "set_only_once": 1
   },
   {
-   "fieldname": "qty_after_transaction",
-   "fieldtype": "Int",
-   "label": "Qty After Transaction",
-   "set_only_once": 1
-  },
-  {
    "fieldname": "price",
    "fieldtype": "Float",
    "label": "Price",
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "balance_stock_value",
-   "fieldtype": "Float",
-   "label": "Balance Stock Value",
    "set_only_once": 1
   },
   {
@@ -83,12 +70,18 @@
    "fieldtype": "Date",
    "label": "Posting Date",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "stock_value_change",
+   "fieldtype": "Float",
+   "label": "Stock Value Change",
+   "set_only_once": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-14 15:03:21.218900",
+ "modified": "2023-06-15 12:38:39.704968",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Stock Ledger Entry",
