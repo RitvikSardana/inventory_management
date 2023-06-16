@@ -15,8 +15,10 @@
   "section_break_nxzg",
   "qty_change",
   "price",
+  "qty_after_transaction",
   "column_break_3oqe",
-  "stock_value_change"
+  "stock_value_change",
+  "valuation"
  ],
  "fields": [
   {
@@ -76,12 +78,24 @@
    "fieldtype": "Float",
    "label": "Stock Value Change",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "valuation",
+   "fieldtype": "Float",
+   "label": "Valuation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_after_transaction",
+   "fieldtype": "Data",
+   "label": "Qty After Transaction",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-15 12:38:39.704968",
+ "modified": "2023-06-16 11:49:41.081080",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Stock Ledger Entry",
