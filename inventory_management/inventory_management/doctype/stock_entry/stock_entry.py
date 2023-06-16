@@ -22,7 +22,7 @@ class StockEntry(Document):
             if stock_entry_type != 'Material Receipt' and item['qty'] > opening_stock:
                 frappe.throw(f"Stock Unavailable in Row {index+1}")
 
-        # Make a list of warehouse and items and query once
+        # TODO:Make a list of warehouse and items and query once
 
     def formatted_child_table(self):
         items_list = []
@@ -40,43 +40,6 @@ class StockEntry(Document):
     def stock_entry_method_validate_return_quantity(self, method, item):
         item_doc = frappe.qb.DocType("Item")
         stock_ledger_doc = frappe.qb.DocType("Stock Ledger Entry")
-        # q = frappe.qb \
-        #     .from_(item_doc) \
-        #     .select("SUM(opening_stock * price)") \
-        #     .select("SUM(price)") \
-        #     .where(item_doc.item_name == "M1 Air") \
-        #     .where(item_doc.warehouse == "Bandra Warehouse") \
-        #     .run()
-        # print(q)
-        # q = frappe.db.get_all(
-        #     "Stock Ledger Entry",
-        #     filters={
-        #         "item_name": "M1 Air",
-        #         "warehouse": "Bandra Warehouse",
-        #     },
-        #     fields=[
-        #         "SUM(qty_change * price) as total_value",
-        #         "SUM(qty_change) as total_qty_change"
-        #     ]
-        # )
-        # total_value = q[0].total_value if q else 0
-        # total_qty_change = q[0].total_qty_change if q else 0
-        # print(total_qty_change, total_value)
-        # p = frappe.db.get_all(
-        #     "Item",
-        #     filters={
-        #         "item_name": "M1 Air",
-        #         "warehouse": "Bandra Warehouse",
-        #     },
-        #     fields=[
-        #         "SUM(opening_stock * price) as total_value",
-        #         "SUM(opening_stock) as total_qty_change"
-        #     ]
-        # )
-        # total_value = p[0].total_value if p else 0
-        # total_opening_stock = p[0].total_opening_stock if p else 0
-        # print(total_opening_stock, total_value)
-        # print(q)
 
         if method == "Material Receipt":
             if item['target_warehouse'] == None:

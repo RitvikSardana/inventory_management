@@ -17,14 +17,14 @@ frappe.query_reports["Stock Ledger Report"] = {
       options: "Item",
     },
     // {
-    //   fieldname: "from_date",
     //   label: __("From Date"),
+    //   fieldname: "from_date",
     //   fieldtype: "Date",
     //   default: frappe.datetime.add_months(frappe.datetime.now_date(), -1),
     // },
     // {
-    //   fieldname: "to_date",
     //   label: __("To Date"),
+    //   fieldname: "to_date",
     //   fieldtype: "Date",
     //   default: frappe.datetime.now_date(),
     // },
