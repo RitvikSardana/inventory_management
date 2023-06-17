@@ -10,13 +10,13 @@ def execute(filters=None):
     columns, data = [], []
 
     columns = get_columns(filters)
-    cs_data = get_query_data(filters)
-    if not cs_data:
+    query_data = get_query_data(filters)
+    if not query_data:
         frappe.msgprint("No records found")
-        return columns, cs_data
+        return columns, query_data
 
     data = []
-    for d in cs_data:
+    for d in query_data:
         row = frappe._dict({
             'date': d.creation,
             'item': d.item,
