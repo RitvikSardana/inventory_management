@@ -12,7 +12,6 @@ class StockEntry(Document):
         children_items_list = self.formatted_child_table()
         # enumerate used to get index of the child,and increment it by 1 to get the row value for better UX
         for index, item in enumerate(children_items_list):
-
             stock_entry_type = self.stock_entry_type
 
             # Validate the stock entry type and return opening stock
@@ -80,7 +79,7 @@ class StockEntry(Document):
 
     def material_receipt_stock_ledger_entry(self):
         children_items_list = self.formatted_child_table()
-
+        print(self.items[0]['name'])
         for item in children_items_list:
             total_value, total_qty = self.get_stock_ledger_entry_totals(
                 item['item'], item['target_warehouse'])
@@ -168,7 +167,8 @@ class StockEntry(Document):
                 price=item['price'],
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty_out + (outgoing_qty),
-                valuation=valuation_out
+                valuation=valuation_out,
+                # voucher=item['']
             )
 
     def get_stock_ledger_entry_totals(self, item, warehouse):

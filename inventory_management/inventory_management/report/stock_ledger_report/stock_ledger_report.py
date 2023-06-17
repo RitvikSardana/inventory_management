@@ -94,40 +94,27 @@ def get_columns(filters):
 
 def get_query_data(filters):
 
-    # print("FFFFF", filters)
-    # filters["posting_date"] = (
-    #     'between', [[filters.from_date, filters.to_date]])
-
     conditions = {}
     for key, value in filters.items():
         if key == 'warehouse' or key == 'item':
             conditions[key] = value
 
-        conditions['posting_date'] = (
-            'between', [[filters.from_date, filters.to_date]])
+    from_date = filters.get("from_date")
+    to_date = filters.get("to_date")
 
-    print(conditions)
+    if from_date and to_date:
+        conditions['date'] = ('between', [from_date, to_date])
+    elif from_date:
+        conditions['date'] = ('between', [from_date])
+    elif to_date:
+        conditions['date'] = ('between', [to_date])
+
+    print("Conditions", conditions)
     query_data = frappe.db.get_all(
         doctype="Stock Ledger Entry",
         fields=["item", "warehouse", "qty_change",
                 "qty_after_transaction", "valuation", "creation", "name", "date"],
-        filters=filters
+        filters=conditions
     )
-    # sle = frappe.qb.DocType("Stock Ledger Entry")
-    # q = frappe.qb.from_(sle) \
-    #     .select(
-    #     "item",
-    #     "warehouse",
-    #     "qty_change",
-    #     "qty_after_transaction",
-    #     "valuation",
-    #     "creation",
-    #     "name",
-    #     "date"
-    # ).where(
-    #     conditions['posting_date'] == (
-    #         'between', [[filters.from_date, filters.to_date]])
-    # ).where(conditions.warehouse == sle['warehouse']).where(conditions.item) == sle['item'].run()
 
     return query_data
-    # return []
