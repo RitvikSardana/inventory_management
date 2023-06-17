@@ -79,11 +79,10 @@ class StockEntry(Document):
 
     def material_receipt_stock_ledger_entry(self):
         children_items_list = self.formatted_child_table()
-        print(self.items[0]['name'])
         for item in children_items_list:
             total_value, total_qty = self.get_stock_ledger_entry_totals(
                 item['item'], item['target_warehouse'])
-
+            print(self.name)
             valuation = 0
             if total_value != 0 or total_qty != 0:
                 valuation = (
@@ -98,7 +97,8 @@ class StockEntry(Document):
                 price=item['price'],
                 stock_value_change=item['qty'] * item['price'],
                 qty_after_transaction=total_qty + item['qty'],
-                valuation=valuation
+                valuation=valuation,
+                voucher=self.name
             )
 
     def material_consume_stock_ledger_entry(self):

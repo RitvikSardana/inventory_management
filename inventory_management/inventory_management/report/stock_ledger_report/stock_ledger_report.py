@@ -21,7 +21,7 @@ def execute(filters=None):
             'date': d.creation,
             'item': d.item,
             'warehouse': d.warehouse,
-            "voucher": d.name,
+            "voucher": d.voucher,
             'in_qty': d.qty_change if d.qty_change > 0 else 0,
             'out_qty': d.qty_change if d.qty_change < 0 else 0,
             'qty_after_transaction': d.qty_after_transaction,
@@ -58,7 +58,8 @@ def get_columns(filters):
         {
             "label": _("Vouncher #"),
             "fieldname": "voucher",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options": "Stock Entry",
             "width": 120,
         },
         {
@@ -109,11 +110,10 @@ def get_query_data(filters):
     elif to_date:
         conditions['date'] = ('between', [to_date])
 
-    print("Conditions", conditions)
     query_data = frappe.db.get_all(
         doctype="Stock Ledger Entry",
         fields=["item", "warehouse", "qty_change",
-                "qty_after_transaction", "valuation", "creation", "name", "date"],
+                "qty_after_transaction", "valuation", "creation", "name", "date", "voucher"],
         filters=conditions
     )
 
