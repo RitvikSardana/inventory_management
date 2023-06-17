@@ -96,13 +96,14 @@
    "fieldname": "voucher",
    "fieldtype": "Link",
    "label": "Voucher #",
-   "options": "Stock Entry"
+   "options": "Stock Entry",
+   "set_only_once": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-17 20:23:24.750551",
+ "modified": "2023-06-17 21:10:30.263156",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Stock Ledger Entry",

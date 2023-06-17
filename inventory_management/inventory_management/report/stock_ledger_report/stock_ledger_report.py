@@ -104,6 +104,8 @@ def get_query_data(filters):
     to_date = filters.get("to_date")
 
     if from_date and to_date:
+        if from_date > to_date:
+            frappe.throw("From Date can't be greater than To Date")
         conditions['date'] = ('between', [from_date, to_date])
     elif from_date:
         conditions['date'] = ('between', [from_date])
