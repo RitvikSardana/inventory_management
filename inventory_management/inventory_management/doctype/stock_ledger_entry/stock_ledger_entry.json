@@ -88,7 +88,7 @@
   },
   {
    "fieldname": "qty_after_transaction",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Qty After Transaction",
    "read_only": 1
   },
@@ -103,7 +103,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-17 21:10:30.263156",
+ "modified": "2023-06-19 12:09:38.211643",
  "modified_by": "Administrator",
  "module": "Inventory Management",
  "name": "Stock Ledger Entry",

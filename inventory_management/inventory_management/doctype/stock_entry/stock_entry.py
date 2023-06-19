@@ -121,7 +121,9 @@ class StockEntry(Document):
                 price=item['price'],
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty + (outgoing_qty),
-                valuation=valuation
+                valuation=valuation,
+                voucher=self.name
+
             )
 
     def material_transfer_stock_ledger_entry(self):
@@ -156,7 +158,9 @@ class StockEntry(Document):
                 price=item['price'],
                 stock_value_change=item['qty'] * item['price'],
                 qty_after_transaction=total_qty_in + item['qty'],
-                valuation=valuation_in
+                valuation=valuation_in,
+                voucher=self.name
+
             )
 
             # Create Source SLE Entry
@@ -168,7 +172,8 @@ class StockEntry(Document):
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty_out + (outgoing_qty),
                 valuation=valuation_out,
-                # voucher=item['']
+                voucher=self.name
+
             )
 
     def get_stock_ledger_entry_totals(self, item, warehouse):
