@@ -8,7 +8,6 @@ from frappe import _
 def execute(filters=None):
 
     columns, data = [], []
-
     columns = get_columns(filters)
     query_data = get_query_data(filters)
     if not query_data:
@@ -110,13 +109,13 @@ def get_query_data(filters):
     elif from_date:
         conditions['date'] = ('between', [from_date])
     elif to_date:
-        conditions['date'] = ('between', [to_date])
+        conditions['date'] = ('between', [to_date, to_date])
 
     query_data = frappe.db.get_all(
         doctype="Stock Ledger Entry",
         fields=["item", "warehouse", "qty_change",
                 "qty_after_transaction", "valuation", "creation", "name", "date", "voucher"],
-        filters=conditions
+        filters=conditions,
     )
 
     return query_data

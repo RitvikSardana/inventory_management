@@ -9,54 +9,55 @@ from inventory_management.inventory_management.sle_utils import create_sle_entry
 class StockEntry(Document):
 
     def validate(self):
-        children_items_list = self.formatted_child_table()
         # enumerate used to get index of the child,and increment it by 1 to get the row value for better UX
-        for index, item in enumerate(children_items_list):
+        for item in self.items:
             stock_entry_type = self.stock_entry_type
 
             # Validate the stock entry type and return opening stock
-            opening_stock = self.stock_entry_method_validate_return_quantity(
-                stock_entry_type, item)
+            # opening_stock = self.stock_entry_method_validate_return_quantity(
+            #     stock_entry_type, item)
+            self.validate_method(item)
             # For Receipt We should not check if stock is available or not
-            if stock_entry_type != 'Material Receipt' and item['qty'] > opening_stock:
-                frappe.throw(f"Stock Unavailable in Row {index+1}")
+            # if stock_entry_type != 'Material Receipt' and item['qty'] > opening_stock:
+            #     frappe.throw(f"Stock Unavailable in Row {item['idx']}")
 
         # TODO:Make a list of warehouse and items and query once
 
-    def formatted_child_table(self):
-        items_list = []
-        for row in self.items:
-            # d is for Child Doc
-            d = {}
-            d['target_warehouse'] = row.target_warehouse or None
-            d['source_warehouse'] = row.source_warehouse or None
-            d['item'] = row.item
-            d['qty'] = row.qty
-            d['price'] = row.price
-            items_list.append(d)
-        return items_list
+    def validate_method(self, item):
+        if self.stock_entry_type == "Material Receipt":
+            if not item.target_warehouse:
+                frappe.throw("Target Warehouse is Required")
+
+        elif self.stock_entry_type == "Material Consume":
+            if not item.source_warehouse:
+                frappe.throw("Source Warehouse is Required")
+
+        elif self.stock_entry_type == "Material Transfer":
+            if not item.target_warehouse or not item.source_warehouse:
+                frappe.throw(
+                    "Both Target Warehouse and Source Warehouse are Required")
 
     def stock_entry_method_validate_return_quantity(self, method, item):
         item_doc = frappe.qb.DocType("Item")
         stock_ledger_doc = frappe.qb.DocType("Stock Ledger Entry")
 
         if method == "Material Receipt":
-            if item['target_warehouse'] == None:
+            if not item.target_warehouse:
                 frappe.throw("Target Warehouse is Required")
 
         elif method == "Material Consume":
-            if item['source_warehouse'] == None:
+            if not item.source_warehouse:
                 frappe.throw("Source Warehouse is Required")
 
         elif method == "Material Transfer":
-            if item['target_warehouse'] == None or item['source_warehouse'] == None:
+            if not item.target_warehouse or not item.source_warehouse:
                 frappe.throw(
                     "Both Target Warehouse and Source Warehouse are Required")
 
         # query to get the item's opening stock
         # TODO: add warehouse also in query as warehouse mei we will also check
         item_opening_stock = frappe.qb.from_(item_doc).select("opening_stock").where(
-            item_doc.item_name == item['item']).run()
+            item_doc.item_name == item.item).where(item_doc.warehouse == item.target_warehouse).run()
 
         # Above query returns a tuple so unpack it
         if len(item_opening_stock) > 0:
@@ -78,86 +79,88 @@ class StockEntry(Document):
             self.material_transfer_stock_ledger_entry()
 
     def material_receipt_stock_ledger_entry(self):
-        children_items_list = self.formatted_child_table()
-        for item in children_items_list:
+        for item in self.items:
             total_value, total_qty = self.get_stock_ledger_entry_totals(
-                item['item'], item['target_warehouse'])
-            print(self.name)
+                item.item, item.target_warehouse)
+
             valuation = 0
             if total_value != 0 or total_qty != 0:
                 valuation = (
-                    total_value + (item['price']*item['qty'])) / (total_qty + item['qty'])
+                    total_value + (item.price*item.qty)) / (total_qty + item.qty)
             else:
-                valuation = (item['qty'] * item['price']) / item['qty']
+                valuation = (item.qty * item.price) / item.qty
 
             create_sle_entry(
-                item=item['item'],
-                warehouse=item['target_warehouse'],
-                qty_change=item['qty'],
-                price=item['price'],
-                stock_value_change=item['qty'] * item['price'],
-                qty_after_transaction=total_qty + item['qty'],
+                item=item.item,
+                warehouse=item.target_warehouse,
+                qty_change=item.qty,
+                price=item.price,
+                stock_value_change=item.qty * item.price,
+                qty_after_transaction=total_qty + item.qty,
                 valuation=valuation,
                 voucher=self.name
             )
 
     def material_consume_stock_ledger_entry(self):
-        children_items_list = self.formatted_child_table()
-        for item in children_items_list:
+        for item in self.items:
 
             total_value, total_qty = self.get_stock_ledger_entry_totals(
-                item['item'], item['source_warehouse'])
+                item.item, item.source_warehouse)
 
             old_valuation = total_value / total_qty
+            print(item.qty)
+            print("QTYYYY", total_qty)
+            outgoing_qty = -1 * item.qty
 
-            outgoing_qty = -1 * item['qty']
-            valuation = (
-                total_value + (old_valuation * (outgoing_qty))) / (total_qty + (outgoing_qty))
+            if total_qty + outgoing_qty == 0:
+                valuation = 0
+
+            else:
+                valuation = (
+                    total_value + (old_valuation * (outgoing_qty))) / (total_qty + (outgoing_qty))
 
             create_sle_entry(
-                item=item['item'],
-                warehouse=item['source_warehouse'],
+                item=item.item,
+                warehouse=item.source_warehouse,
                 qty_change=outgoing_qty,
-                price=item['price'],
+                price=item.price,
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty + (outgoing_qty),
                 valuation=valuation,
                 voucher=self.name
-
             )
 
     def material_transfer_stock_ledger_entry(self):
-        children_items_list = self.formatted_child_table()
-        for item in children_items_list:
+        for item in self.items:
             # For Target Warehouse
             total_value_in, total_qty_in = self.get_stock_ledger_entry_totals(
-                item['item'], item['target_warehouse'])
+                item.item, item.target_warehouse)
             valuation_in = 0
 
             if total_value_in != 0 or total_qty_in != 0:
                 valuation_in = (
-                    total_value_in + (item['price']*item['qty'])) / (total_qty_in + item['qty'])
+                    total_value_in + (item.price*item.qty)) / (total_qty_in + item.qty)
             else:
-                valuation_in = (item['qty'] * item['price']) / item['qty']
+                valuation_in = (item.qty * item.price) / item.qty
 
             # For Source Warehouse
             total_value_out, total_qty_out = self.get_stock_ledger_entry_totals(
-                item['item'], item['source_warehouse'])
+                item.item, item.source_warehouse)
 
             old_valuation = total_value_out / total_qty_out
 
-            outgoing_qty = -1 * item['qty']
+            outgoing_qty = -1 * item.qty
             valuation_out = (
                 total_value_out + (old_valuation * (outgoing_qty))) / (total_qty_out + (outgoing_qty))
 
             # Create Target SLE Entry
             create_sle_entry(
-                item=item['item'],
-                warehouse=item['target_warehouse'],
-                qty_change=item['qty'],
-                price=item['price'],
-                stock_value_change=item['qty'] * item['price'],
-                qty_after_transaction=total_qty_in + item['qty'],
+                item=item.item,
+                warehouse=item.target_warehouse,
+                qty_change=item.qty,
+                price=item.price,
+                stock_value_change=item.qty * item.price,
+                qty_after_transaction=total_qty_in + item.qty,
                 valuation=valuation_in,
                 voucher=self.name
 

@@ -19,7 +19,7 @@ def execute(filters=None):
         row = frappe._dict({
             'item': d.item,
             'warehouse': d.warehouse,
-            'qty_after_transaction': d.qty_change,
+            'qty_after_transaction': d.qty_after_transaction,
             'balance_stock_value': d.valuation * d.qty_after_transaction,
             'date': d.date
         })
@@ -33,7 +33,7 @@ def get_columns(filters):
         {
             "label": _("Date"),
             "fieldname": "date",
-            "fieldtype": "date",
+            "fieldtype": "Date",
             "width": 150
         },
         {
@@ -79,13 +79,37 @@ def get_query_data(filters):
 
     elif to_date:
         conditions['date'] = ('between', [to_date, to_date])
+    else:
+        conditions = {}
 
     query_data = frappe.db.get_all(
         doctype="Stock Ledger Entry",
-        fields=["item", "warehouse", "SUM(qty_change) as qty_change",
-                "qty_after_transaction", "valuation", "creation", "name", "date", "voucher"],
-        group_by="item, warehouse",
-        filters=conditions
+        fields=[
+            "item",
+            "warehouse",
+            "qty_change",
+            "qty_after_transaction",
+            "valuation",
+            "creation",
+            "date"
+        ],
+        filters=conditions,
     )
 
-    return query_data
+    grouped_data = {}
+
+    for record in query_data:
+        item = record.item
+        warehouse = record.warehouse
+        valuation = record.valuation
+
+        if (item, warehouse) not in grouped_data:
+            grouped_data[(item, warehouse)] = record
+        else:
+            latest_record = grouped_data[(item, warehouse)]
+            if record.creation > latest_record.creation:
+                grouped_data[(item, warehouse)] = record
+
+    result = list(grouped_data.values())
+
+    return result
