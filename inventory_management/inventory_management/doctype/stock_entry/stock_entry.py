@@ -110,6 +110,10 @@ class StockEntry(Document):
             old_valuation = total_value / total_qty
             print(item.qty)
             print("QTYYYY", total_qty)
+
+            if item.qty > total_qty:
+                frappe.throw("Stock Unavailable")
+
             outgoing_qty = -1 * item.qty
 
             if total_qty + outgoing_qty == 0:
@@ -168,10 +172,10 @@ class StockEntry(Document):
 
             # Create Source SLE Entry
             create_sle_entry(
-                item=item['item'],
-                warehouse=item['source_warehouse'],
+                item=item.item,
+                warehouse=item.source_warehouse,
                 qty_change=outgoing_qty,
-                price=item['price'],
+                price=item.price,
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty_out + (outgoing_qty),
                 valuation=valuation_out,

@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.model.document import Document
-from inventory_management.inventory_management.sle_utils import create_sle_entry
 
 
 class Item(Document):
