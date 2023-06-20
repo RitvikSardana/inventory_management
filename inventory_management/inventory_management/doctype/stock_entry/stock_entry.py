@@ -108,8 +108,8 @@ class StockEntry(Document):
                 item.item, item.source_warehouse)
 
             old_valuation = total_value / total_qty
-            print(item.qty)
-            print("QTYYYY", total_qty)
+            # print(item.qty)
+            # print("QTYYYY", total_qty)
 
             if item.qty > total_qty:
                 frappe.throw("Stock Unavailable")
