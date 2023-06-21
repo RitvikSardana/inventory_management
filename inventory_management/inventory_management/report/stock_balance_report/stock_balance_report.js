@@ -5,13 +5,7 @@
 frappe.query_reports["Stock Balance Report"] = {
   filters: [
     {
-      label: __("From Date"),
-      fieldname: "from_date",
-      fieldtype: "Date",
-      default: frappe.datetime.add_months(frappe.datetime.now_date(), -1),
-    },
-    {
-      label: __("To Date"),
+      label: __("Date"),
       fieldname: "to_date",
       fieldtype: "Date",
       default: frappe.datetime.now_date(),

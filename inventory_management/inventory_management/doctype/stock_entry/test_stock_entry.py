@@ -50,17 +50,6 @@ class TestItem(FrappeTestCase):
         new_sle_count = frappe.db.count("Stock Ledger Entry")
         self.assertEqual(new_sle_count, initial_sle_count + 1)
 
-        # # Check the valuation is correct or not
-        # new_sle_entry = frappe.db.get_all(
-        #     "Stock Ledger Entry",
-        #     filters={
-        #         "item": item,
-        #         "warehouse": warehouse,
-        #     },
-        #     fields=["valuation"]
-        # )
-        # expected_valuation = 10
-        # self.assertEqual(expected_valuation, new_sle_entry[0]["valuation"])
 
     def test_save_stock_entry_consume(self):
         item = frappe.db.get_all("Item")[0]['name']
