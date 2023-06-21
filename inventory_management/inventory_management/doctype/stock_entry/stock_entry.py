@@ -9,7 +9,7 @@ from frappe import _
 class StockEntry(Document):
 
     def validate(self):
-        # enumerate used to get index of the child,and increment it by 1 to get the row value for better UX
+
         for item in self.items:
             stock_entry_type = self.stock_entry_type
 
@@ -29,8 +29,6 @@ class StockEntry(Document):
             if not item.target_warehouse or not item.source_warehouse:
                 frappe.throw(_(
                     f"Both Target Warehouse and Source Warehouse are Required"))
-
-
 
     def on_submit(self):
         # For each item create SLE
