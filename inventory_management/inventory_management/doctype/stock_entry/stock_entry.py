@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from inventory_management.inventory_management.sle_utils import create_sle_entry
-
+from frappe import _
 
 class StockEntry(Document):
 
@@ -19,16 +19,16 @@ class StockEntry(Document):
     def validate_method(self, item):
         if self.stock_entry_type == "Material Receipt":
             if not item.target_warehouse:
-                frappe.throw("Target Warehouse is Required")
+                frappe.throw(_("Target Warehouse is Required"))
 
         elif self.stock_entry_type == "Material Consume":
             if not item.source_warehouse:
-                frappe.throw("Source Warehouse is Required")
+                frappe.throw(_("Source Warehouse is Required"))
 
         elif self.stock_entry_type == "Material Transfer":
             if not item.target_warehouse or not item.source_warehouse:
-                frappe.throw(
-                    "Both Target Warehouse and Source Warehouse are Required")
+                frappe.throw(_(
+                    f"Both Target Warehouse and Source Warehouse are Required"))
 
 
 
@@ -74,14 +74,14 @@ class StockEntry(Document):
                 item.item, item.source_warehouse)
 
             if total_qty <= 0:
-                frappe.throw("No Stock Available at row {item.idx}")
+                frappe.throw(_("No Stock Available at row {item.idx}"))
 
             old_valuation = total_value / total_qty
 
 
             if item.qty > total_qty:
-                frappe.throw(
-                    f"Stock Unavailable at row {item.idx}, Available Stock is {total_qty}")
+                frappe.throw(_(
+                    f"Stock Unavailable at row {item.idx}, Available Stock is {total_qty}"))
 
             outgoing_qty = -1 * item.qty
 
@@ -100,7 +100,9 @@ class StockEntry(Document):
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty + (outgoing_qty),
                 valuation=valuation,
-                voucher=self.name
+                voucher=self.name,
+                date=self.posting_date
+
             )
 
     def material_transfer_stock_ledger_entry(self):
@@ -135,8 +137,8 @@ class StockEntry(Document):
                 stock_value_change=item.qty * item.price,
                 qty_after_transaction=total_qty_in + item.qty,
                 valuation=valuation_in,
-                voucher=self.name
-
+                voucher=self.name,
+                date=self.posting_date
             )
 
             # Create Source SLE Entry
@@ -148,8 +150,8 @@ class StockEntry(Document):
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty_out + (outgoing_qty),
                 valuation=valuation_out,
-                voucher=self.name
-
+                voucher=self.name,
+                date=self.posting_date
             )
 
     def get_stock_ledger_entry_totals(self, item, warehouse):

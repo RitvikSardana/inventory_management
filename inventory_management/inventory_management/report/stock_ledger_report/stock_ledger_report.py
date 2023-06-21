@@ -11,7 +11,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	query_data = get_query_data(filters)
 	if not query_data:
-		frappe.msgprint("No records found")
+		frappe.msgprint(_("No records found"))
 		return columns, query_data
 
 	data = []
@@ -114,6 +114,6 @@ def get_query_data(filters):
 		filters=conditions,
 		order_by="date DESC"
 	)
-	
+
 	return query_data
 
