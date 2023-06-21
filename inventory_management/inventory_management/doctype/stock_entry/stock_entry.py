@@ -37,35 +37,35 @@ class StockEntry(Document):
                 frappe.throw(
                     "Both Target Warehouse and Source Warehouse are Required")
 
-    def stock_entry_method_validate_return_quantity(self, method, item):
-        item_doc = frappe.qb.DocType("Item")
-        stock_ledger_doc = frappe.qb.DocType("Stock Ledger Entry")
+    # def stock_entry_method_validate_return_quantity(self, method, item):
+    #     item_doc = frappe.qb.DocType("Item")
+    #     stock_ledger_doc = frappe.qb.DocType("Stock Ledger Entry")
 
-        if method == "Material Receipt":
-            if not item.target_warehouse:
-                frappe.throw("Target Warehouse is Required")
+    #     if method == "Material Receipt":
+    #         if not item.target_warehouse:
+    #             frappe.throw("Target Warehouse is Required")
 
-        elif method == "Material Consume":
-            if not item.source_warehouse:
-                frappe.throw("Source Warehouse is Required")
+    #     elif method == "Material Consume":
+    #         if not item.source_warehouse:
+    #             frappe.throw("Source Warehouse is Required")
 
-        elif method == "Material Transfer":
-            if not item.target_warehouse or not item.source_warehouse:
-                frappe.throw(
-                    "Both Target Warehouse and Source Warehouse are Required")
+    #     elif method == "Material Transfer":
+    #         if not item.target_warehouse or not item.source_warehouse:
+    #             frappe.throw(
+    #                 "Both Target Warehouse and Source Warehouse are Required")
 
-        # query to get the item's opening stock
-        # TODO: add warehouse also in query as warehouse mei we will also check
-        item_opening_stock = frappe.qb.from_(item_doc).select("opening_stock").where(
-            item_doc.item_name == item.item).where(item_doc.warehouse == item.target_warehouse).run()
+    #     # query to get the item's opening stock
+    #     # TODO: add warehouse also in query as warehouse mei we will also check
+    #     item_opening_stock = frappe.qb.from_(item_doc).select("opening_stock").where(
+    #         item_doc.item_name == item.item).where(item_doc.warehouse == item.target_warehouse).run()
 
-        # Above query returns a tuple so unpack it
-        if len(item_opening_stock) > 0:
-            item_opening_stock = item_opening_stock[0][0]
-        else:
-            item_opening_stock = 0
+    #     # Above query returns a tuple so unpack it
+    #     if len(item_opening_stock) > 0:
+    #         item_opening_stock = item_opening_stock[0][0]
+    #     else:
+    #         item_opening_stock = 0
 
-        return item_opening_stock
+    #     return item_opening_stock
 
     def on_submit(self):
         # For each item create SLE
@@ -107,12 +107,16 @@ class StockEntry(Document):
             total_value, total_qty = self.get_stock_ledger_entry_totals(
                 item.item, item.source_warehouse)
 
+            if total_qty <= 0:
+                frappe.throw("No Stock Available at row {item.idx}")
+
             old_valuation = total_value / total_qty
             # print(item.qty)
             # print("QTYYYY", total_qty)
 
             if item.qty > total_qty:
-                frappe.throw("Stock Unavailable")
+                frappe.throw(
+                    f"Stock Unavailable at row {item.idx}, Available Stock is {total_qty}")
 
             outgoing_qty = -1 * item.qty
 
