@@ -81,7 +81,6 @@ class StockEntry(Document):
                     f"Stock Unavailable at row {item.idx}, Available Stock is {total_qty}"))
 
             outgoing_qty = -1 * item.qty
-            print(total_value,total_qty,old_valuation,item.qty)
             if total_qty + outgoing_qty == 0:
                 valuation = 0
 
@@ -130,8 +129,8 @@ class StockEntry(Document):
                 item=item.item,
                 warehouse=item.target_warehouse,
                 qty_change=item.qty,
-                price=item.price,
-                stock_value_change=item.qty * item.price,
+                price=old_valuation,
+                stock_value_change=item.qty * old_valuation,
                 qty_after_transaction=total_qty_in + item.qty,
                 valuation=valuation_in,
                 voucher=self.name,
@@ -230,4 +229,51 @@ class StockEntry(Document):
             )
 
     def material_transfer_stock_ledger_entry_cancel(self):
-        pass
+        for item in self.items:
+            # For Target Warehouse
+            total_value_target, total_qty_target = self.get_stock_ledger_entry_totals(
+                item.item, item.target_warehouse)
+            valuation_target = 0
+            outgoing_qty = -1 * item.qty
+            old_valuation = total_value_source / total_qty_out_source
+
+            if total_value_target != 0 or total_qty_target != 0:
+                valuation_target = (
+                    total_value_target + (old_valuation*outgoing_qty)) / (total_qty_target + outgoing_qty)
+            else:
+                valuation_target = (item.qty * item.price) / item.qty
+
+            # For Source Warehouse
+            total_value_source, total_qty_out_source = self.get_stock_ledger_entry_totals(
+                item.item, item.source_warehouse)
+
+
+            valuation_out = (
+                total_value_source + (old_valuation * (item.qty))) / (total_qty_out_source + (item.qty))
+
+            # Create Target SLE Entry
+            create_sle_entry(
+                item=item.item,
+                warehouse=item.target_warehouse,
+                qty_change=outgoing_qty,
+                price=old_valuation,
+                stock_value_change=outgoing_qty * old_valuation,
+                qty_after_transaction=total_qty_target + outgoing_qty,
+                valuation=valuation_target,
+                voucher=self.name,
+                date=self.posting_date
+            )
+
+
+            # Create Source SLE Entry
+            create_sle_entry(
+                item=item.item,
+                warehouse=item.source_warehouse,
+                qty_change=item.qty,
+                price=valuation_out,
+                stock_value_change=item.qty * valuation_out,
+                qty_after_transaction=total_qty_out_source + item.qty,
+                valuation=valuation_out,
+                voucher=self.name,
+                date=self.posting_date
+            )

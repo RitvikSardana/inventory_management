@@ -168,3 +168,6 @@ class TestItem(FrappeTestCase):
         expected_valuation = 7.5
 
         self.assertEqual(expected_valuation, calculated_valuation)
+
+        def test_valuation_cancel(self):
+            pass
