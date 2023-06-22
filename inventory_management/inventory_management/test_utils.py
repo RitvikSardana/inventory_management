@@ -28,7 +28,7 @@ def create_stock_entry(doctype, stock_entry_type, submit_item_flag=False, items=
             "items": items
         }).insert().submit()
 
-        return doc.name
+        return doc
 
     else:
         doc = frappe.get_doc({

@@ -62,7 +62,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty + item.qty,
                 valuation=valuation,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
 
     def material_consume_stock_ledger_entry(self):
@@ -97,7 +98,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty + (outgoing_qty),
                 valuation=valuation,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
 
             )
 
@@ -134,7 +136,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty_in + item.qty,
                 valuation=valuation_in,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
 
             # Create Source SLE Entry
@@ -147,7 +150,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty_out + (outgoing_qty),
                 valuation=valuation_out,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
 
     def get_stock_ledger_entry_totals(self, item, warehouse):
@@ -201,7 +205,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty + outgoing_qty,
                 valuation=valuation,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
 
     def material_consume_stock_ledger_entry_cancel(self):
@@ -225,7 +230,8 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty + item.qty,
                 valuation=valuation,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
 
     def material_transfer_stock_ledger_entry_cancel(self):
@@ -261,9 +267,9 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty_target + outgoing_qty,
                 valuation=valuation_target,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
-
 
             # Create Source SLE Entry
             create_sle_entry(
@@ -275,5 +281,6 @@ class StockEntry(Document):
                 qty_after_transaction=total_qty_out_source + item.qty,
                 valuation=valuation_out,
                 voucher=self.name,
-                date=self.posting_date
+                date=self.posting_date,
+                posting_time=self.posting_time
             )
