@@ -6,6 +6,7 @@ from frappe.model.document import Document
 from inventory_management.inventory_management.sle_utils import create_sle_entry
 from frappe import _
 
+
 class StockEntry(Document):
 
     def validate(self):
@@ -14,7 +15,6 @@ class StockEntry(Document):
             stock_entry_type = self.stock_entry_type
 
             self.validate_method(item)
-
 
     def validate_method(self, item):
         if self.stock_entry_type == "Material Receipt":
@@ -76,13 +76,12 @@ class StockEntry(Document):
 
             old_valuation = total_value / total_qty
 
-
             if item.qty > total_qty:
                 frappe.throw(_(
                     f"Stock Unavailable at row {item.idx}, Available Stock is {total_qty}"))
 
             outgoing_qty = -1 * item.qty
-
+            print(total_value,total_qty,old_valuation,item.qty)
             if total_qty + outgoing_qty == 0:
                 valuation = 0
 
@@ -94,7 +93,7 @@ class StockEntry(Document):
                 item=item.item,
                 warehouse=item.source_warehouse,
                 qty_change=outgoing_qty,
-                price=item.price,
+                price=old_valuation,
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty + (outgoing_qty),
                 valuation=valuation,
@@ -144,7 +143,7 @@ class StockEntry(Document):
                 item=item.item,
                 warehouse=item.source_warehouse,
                 qty_change=outgoing_qty,
-                price=item.price,
+                price=valuation_out,
                 stock_value_change=-1 * old_valuation,
                 qty_after_transaction=total_qty_out + (outgoing_qty),
                 valuation=valuation_out,
@@ -153,6 +152,9 @@ class StockEntry(Document):
             )
 
     def get_stock_ledger_entry_totals(self, item, warehouse):
+        # print(self.stock_entry_type)
+        # if self.stock_entry_type == "Material Consume":
+        #     pass
         q = frappe.db.get_all(
             "Stock Ledger Entry",
             filters={
@@ -167,3 +169,65 @@ class StockEntry(Document):
         total_value = q[0]['total_value'] if q and q[0]['total_value'] is not None else 0
         total_qty = q[0]['total_qty'] if q and q[0]['total_value'] is not None else 0
         return total_value, total_qty
+
+    def on_cancel(self):
+        if self.stock_entry_type == 'Material Receipt':
+            self.material_receipt_stock_ledger_entry_cancel()
+
+        elif self.stock_entry_type == 'Material Consume':
+            self.material_consume_stock_ledger_entry_cancel()
+
+        elif self.stock_entry_type == 'Material Transfer':
+            self.material_transfer_stock_ledger_entry_cancel()
+
+    def material_receipt_stock_ledger_entry_cancel(self):
+        for item in self.items:
+            total_value, total_qty = self.get_stock_ledger_entry_totals(
+                item.item, item.target_warehouse)
+            outgoing_qty = -1 * item.qty
+            valuation = 0
+
+            if total_qty + outgoing_qty == 0:
+                valuation = 0
+            else:
+                valuation = (total_value + (item.price*outgoing_qty)
+                             ) / (total_qty + outgoing_qty)
+
+            create_sle_entry(
+                item=item.item,
+                warehouse=item.target_warehouse,
+                qty_change=outgoing_qty,
+                price=item.price,
+                stock_value_change=outgoing_qty * item.price,
+                qty_after_transaction=total_qty + outgoing_qty,
+                valuation=valuation,
+                voucher=self.name,
+                date=self.posting_date
+            )
+
+    def material_consume_stock_ledger_entry_cancel(self):
+        for item in self.items:
+            total_value, total_qty = self.get_stock_ledger_entry_totals(
+                item.item, item.source_warehouse)
+
+            old_valuation = total_value / total_qty
+   
+
+            valuation = (total_value + (old_valuation * (item.qty))
+                         ) / (total_qty + item.qty)
+            
+
+            create_sle_entry(
+                item=item.item,
+                warehouse=item.source_warehouse,
+                qty_change=item.qty,
+                price=valuation,
+                stock_value_change=item.qty * valuation,
+                qty_after_transaction=total_qty + item.qty,
+                valuation=valuation,
+                voucher=self.name,
+                date=self.posting_date
+            )
+
+    def material_transfer_stock_ledger_entry_cancel(self):
+        pass

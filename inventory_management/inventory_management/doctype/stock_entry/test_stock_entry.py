@@ -14,7 +14,6 @@ class TestItem(FrappeTestCase):
         item = create_item("Test Item")
         warehouse = create_warehouse("Test Warehouse")
 
-
     def tearDown(self):
         frappe.db.delete("Stock Ledger Entry", filters={
             "item": "Test Item"
@@ -86,7 +85,7 @@ class TestItem(FrappeTestCase):
         else:
             doc.items[0].source_warehouse = warehouse
             doc.submit()
-            
+
             # Check whether a new entry was created or not
             doc_entry_exits = frappe.db.exists("Stock Ledger Entry", { "voucher": receipt_doc})
             if doc_entry_exits:

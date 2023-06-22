@@ -16,7 +16,6 @@ def execute(filters=None):
 
 	data = []
 	for d in query_data:
-		print(d)
 		row = frappe._dict({ 
 			'date': d.creation,
 			'item': d.item,
